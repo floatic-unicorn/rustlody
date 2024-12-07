@@ -1,12 +1,13 @@
-use std::fs;
-use reqwest::{header::{HeaderMap, HeaderValue, AUTHORIZATION}, Client};
+use reqwest::{
+    header::{HeaderMap, HeaderValue, AUTHORIZATION},
+    Client,
+};
 
 use crate::http::token::make_token;
 
-
 pub struct PantosHttpClient {
     pub url: String,
-    pub client: Client
+    pub client: Client,
 }
 
 impl PantosHttpClient {
@@ -23,43 +24,61 @@ impl PantosHttpClient {
         let token = HeaderValue::from_str(&bearer).unwrap();
 
         headers.insert(AUTHORIZATION, token);
-        return headers
+        headers
     }
 
     // TOS
-    pub async fn upload_excel(&mut self) {
+    pub async fn upload_excel(&self) {
         println!("[TOS] | [REQ] upload_excel");
 
+        let url = String::from(&self.url) + "/v1/waves/multiple";
         let headers = self.make_auth_headers();
 
-        let file = fs::read("./resources/wave.excel").unwrap();
-        let file_part = reqwest::multipart::Part::bytes(file)
-            .file_name("bg.jpg")
-            .mime_str("image/jpg")
+        let form = reqwest::multipart::Form::new()
+            .file("createWaves", "./resources/wave")
+            .await
             .unwrap();
-        let form = reqwest::multipart::Form::new().part("img", file_part);
 
-        match self.client
-            .post(&self.url)
+        match self
+            .client
+            .post(url)
             .headers(headers)
             .multipart(form)
             .send()
             .await
         {
-            Ok(_res) => {
-                match _res.error_for_status() {
-                    Ok(_res) => println!("[TOS] | [RES] upload_excel success"),
-                    Err(_err) => println!("[TOS] | [RES] upload_excel failed due to: {}", _err)
-                }
+            Ok(_res) => match _res.error_for_status() {
+                Ok(_res) => println!("[TOS] | [RES] upload_excel success"),
+                Err(_err) => println!("[TOS] | [RES] upload_excel response error: {}", _err),
             },
             Err(_err) => println!("[TOS] | [RES] upload_excel failed due to: {}", _err),
         }
     }
 
-    /*
     // Flody Console
-    fn move_to_loading_zone();
+    pub async fn command_robot_loading(&self) {
+        println!("[TOS] | [REQ] command_robot_loading");
 
+        let robot_uid = "dBK39Eak";
+        let url = String::from(&self.url) + "/v1/robots/" + robot_uid + "/load";
+        let headers = self.make_auth_headers();
+
+        match self.client.post(url).headers(headers).send().await {
+            Ok(_res) => match _res.error_for_status() {
+                Ok(_res) => println!("[TOS] | [RES] command_robot_loading success"),
+                Err(_err) => println!(
+                    "[TOS] | [RES] command_robot_loading response error: {}",
+                    _err
+                ),
+            },
+            Err(_err) => println!(
+                "[TOS] | [RES] command_robot_loading failed due to: {}",
+                _err
+            ),
+        }
+    }
+
+    /*
     fn identify_repesentative_invoice_barcode();
 
     fn start_work();

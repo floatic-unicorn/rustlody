@@ -2,7 +2,8 @@ use serde::{Deserialize, Serialize};
 use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 
 
-const PANTOS_LOCAL_KEY: &str = "f9e9e44b8d96e1b3b0a2817bc31233e8e3cc83aec84eff4c5fbdaedbfe2dba8cc65477841a65ded6d78ee88a0feabfc3571b8d19394d0ccf7b6fb55d41383856a";
+const PANTOS_LOCAL_KEY: &str = 
+"f9e9e44b8d96e1b3ba2817bc31233e8e3cc83aec84eff4c5fbdaedbfe2dba8cc65477841a65ded6d78ee88a0feabfc3571b8d19394d0ccf7b6fb55d41383856a";
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
@@ -34,5 +35,5 @@ pub fn make_token() -> String {
         Ok(t) => t,
         Err(_) => panic!(), // in practice you would return the error
     };
-    return token;
+    token
 }

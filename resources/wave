@@ -1,0 +1,34 @@
+[
+    {
+        "warehouseId": "dBK39Eak",
+        "wmsWaveId": "wmsWaveId-1",
+        "waveName": "waveName",
+        "affinity": "affinity",
+        "sellingChannel": "sellingChannel",
+        "boxType": "boxType",
+        "maxBoxCount": 3,
+        "desiredBoxCount": 3,
+        "workGroups": [
+            {
+                "wmsWorkGroupId": "wmsWorkGroupId-1",
+                "trackingNumber": "trackingNumber-1",
+                "boxLocation": {
+                    "floor": 1,
+                    "sequence": 1
+                },
+                "works": [
+                    {
+                        "sku": {
+                            "wmsSkuId": "wmsSkuId-1",
+                            "name": "wmsSkuName",
+                            "locationCode": "locationCode-1",
+                            "skuBarcode": "skuBarCode"
+                        },
+                        "requestQuantity": 1,
+                        "isTamperEvident": false
+                    }
+                ]
+            }
+        ]
+    }
+]
