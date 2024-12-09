@@ -1,17 +1,15 @@
-use std::{thread, time};
+use std::sync::{Arc, Mutex};
 
 use crate::http::client::PantosHttpClient;
 use crate::kafka::pantos_client::PantosKafkaClient;
-use crate::stomp::pantos_client::run;
 
 pub async fn run_success_flow(
     http_client: PantosHttpClient,
     kafka_client: PantosKafkaClient,
-    //stomp_client: PantosStompClient,
+    picking_ids_container: Arc<Mutex<Vec<String>>>,
 ) {
     let robot_uid = "dBK39Eak";
     let tracking_number = "trackingNumber-1";
-    run().await;
 
     http_client.upload_excel().await;
 
@@ -24,4 +22,6 @@ pub async fn run_success_flow(
 
     http_client.start_work(robot_uid, tracking_number).await;
     kafka_client.consume_desired_topic().await;
+
+    println!("### picking_ids = {:?}", picking_ids_container);
 }

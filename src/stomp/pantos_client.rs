@@ -1,71 +1,84 @@
+use crate::stomp::message::WsRobotInProgress;
 use async_trait::async_trait;
 use ezsockets::ClientConfig;
-use ezsockets::CloseCode;
-use ezsockets::CloseFrame;
 use ezsockets::Error;
-use std::io::BufRead;
+use std::sync::Arc;
+use std::sync::Mutex;
 use std::{thread, time};
-use url::Url;
 
-enum Call {
-    NewLine(String),
+pub struct PantosStompClient {
+    handle: ezsockets::Client<Self>,
+    picking_ids: Arc<Mutex<Vec<String>>>,
 }
 
-struct Client {
-    handle: ezsockets::Client<Self>,
+impl PantosStompClient {
+    pub async fn init(picking_ids: Arc<Mutex<Vec<String>>>) {
+        tracing_subscriber::fmt::init();
+
+        let config = ClientConfig::new("ws://127.0.0.1:8080/ws");
+        let (_, future) = ezsockets::connect(
+            |handle| PantosStompClient {
+                handle,
+                picking_ids,
+            },
+            config,
+        )
+        .await;
+        thread::sleep(time::Duration::from_secs(3)); // wait for websocket to connect
+
+        tokio::spawn(async move {
+            future.await.unwrap();
+        });
+    }
+
+    pub fn parse(&self, text: String) -> Option<Vec<String>> {
+        let mut msgs = text.split("\n");
+        let header = msgs.next().unwrap();
+        if header != "MESSAGE" {
+            return None;
+        }
+
+        let msg_body = msgs.last().unwrap().trim_matches('\0');
+        let de_body: WsRobotInProgress = serde_json::from_str(msg_body).unwrap();
+        tracing::info!("[WS] | [RECV]: deserialized = {:?}", de_body);
+
+        Some(
+            de_body
+                .in_progress_pickings
+                .iter()
+                .map(|picking_cmd| picking_cmd.picking_id.clone())
+                .collect(),
+        )
+    }
 }
 
 #[async_trait]
-impl ezsockets::ClientExt for Client {
-    type Call = Call;
+impl ezsockets::ClientExt for PantosStompClient {
+    type Call = ();
 
     async fn on_text(&mut self, text: String) -> Result<(), Error> {
-        tracing::info!("@@@received message: {text}");
+        match self.parse(text) {
+            None => (),
+            Some(picking_ids) => { /* move the picking ids */ }
+        }
         Ok(())
     }
 
     async fn on_binary(&mut self, bytes: Vec<u8>) -> Result<(), Error> {
-        panic!("[WS] received unwatned binary")
+        panic!("[WS] received socket binary")
     }
 
     async fn on_call(&mut self, call: Self::Call) -> Result<(), Error> {
-        tracing::info!("### on call !!!");
-        match call {
-            Call::NewLine(line) => {
-                println!("####3please");
-                if line == "exit" {
-                    tracing::info!("exiting...");
-                    self.handle
-                        .close(Some(CloseFrame {
-                            code: CloseCode::Normal,
-                            reason: "adios!".to_string(),
-                        }))
-                        .unwrap();
-                    return Ok(());
-                }
-                tracing::info!("sending {line}");
-                self.handle.text(line).unwrap();
-            }
-        };
-        Ok(())
+        panic!("[WS] received socket on_call")
     }
-}
 
-pub async fn run() {
-    tracing_subscriber::fmt::init();
-    let config = ClientConfig::new("ws://127.0.0.1:8080/ws");
-    let (handle, future) = ezsockets::connect(|handle| Client { handle }, config).await;
-    thread::sleep(time::Duration::from_secs(3)); // wait for websocket to connect
-
-    tokio::spawn(async move {
-        handle.text("CONNECT\naccept-version:1.2\n\n\0").unwrap();
-        handle
+    async fn on_connect(&mut self) -> Result<(), Error> {
+        self.handle
+            .text("CONNECT\naccept-version:1.2\n\n\0")
+            .unwrap();
+        self.handle
             .text("SUBSCRIBE\nid:sub-0\ndestination:/topic/fleet/dBK39Eak?concern=inProgress\n\n\0")
             .unwrap();
-
-        //thread::sleep(time::Duration::from_secs(3));
-
-        future.await.unwrap();
-        tracing::info!("*** end ***");
-    });
+        Ok(())
+    }
 }

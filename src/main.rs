@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 pub mod coordinator;
 pub mod database;
 pub mod http;
@@ -8,10 +10,16 @@ pub mod stomp;
 async fn main() {
     let pantos_http_client = http::client::PantosHttpClient::new();
     let kafka_client = kafka::pantos_client::PantosKafkaClient::new();
-    //let stomp_client = stomp::pantos_client::PantosStompClient::new().await;
+
+    let picking_ids_container = Arc::new(Mutex::new(vec![]));
+    stomp::pantos_client::PantosStompClient::init(picking_ids_container.clone()).await;
 
     database::db::setup().await;
 
-    //coordinator::success_flow::run_success_flow(pantos_http_client, kafka_client, stomp_client).await
-    coordinator::success_flow::run_success_flow(pantos_http_client, kafka_client).await
+    coordinator::success_flow::run_success_flow(
+        pantos_http_client,
+        kafka_client,
+        picking_ids_container,
+    )
+    .await
 }
