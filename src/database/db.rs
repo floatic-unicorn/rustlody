@@ -6,7 +6,7 @@ async fn get_db_pool() -> Result<Pool<MySql>, Error> {
         .username("root")
         .password("root")
         .host("127.0.0.1")
-        .port(3307)
+        .port(3306)
         .database("lxpantos");
     MySqlPool::connect_with(options).await
 }
