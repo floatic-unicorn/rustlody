@@ -2,7 +2,7 @@
     {
         "warehouseId": "dBK39Eak",
         "wmsWaveId": "wmsWaveId-1",
-        "waveName": "waveName",
+        "waveName": "rustlody-test-waveName",
         "affinity": "affinity",
         "sellingChannel": "sellingChannel",
         "boxType": "boxType",

@@ -1,3 +1,5 @@
+use std::{thread, time};
+
 use rdkafka::config::{ClientConfig, RDKafkaLogLevel};
 use rdkafka::consumer::stream_consumer::StreamConsumer;
 use rdkafka::consumer::{CommitMode, Consumer};
@@ -16,6 +18,7 @@ impl Default for PantosKafkaClient {
 }
 
 impl PantosKafkaClient {
+
     pub fn new() -> Self {
         let consumer: StreamConsumer = ClientConfig::new()
             .set("group.id", "rustlody")
@@ -40,10 +43,13 @@ impl PantosKafkaClient {
         PantosKafkaClient { consumer, producer }
     }
 
-    pub async fn received_command_move_to_loading_zone(&self) {
+    //received_command_move_to_loading_zone
+    pub async fn consume_desired_topic(&self) {
+        thread::sleep(time::Duration::from_secs(3));
+
         match self.consumer.recv().await {
             Err(_err) => println!(
-                "[ROBOT-KAFKA] | [SUB] | [ERR] | received_coommand_move_to_loading_zone report failed: {}",
+                "[ROBOT-KAFKA] | [SUB] | [ERR] | consume desired topic failed: {}",
                 _err
             ),
             Ok(_msg) => {
@@ -51,12 +57,12 @@ impl PantosKafkaClient {
                     None => "",
                     Some(Ok(s)) => s,
                     Some(Err(e)) => {
-                        println!("[ROBOT-KAFKA] | [SUB] | [ERR] | Error while deserializing message payload: {:?}", e);
+                        println!("[ROBOT-KAFKA] | [SUB] | [ERR] | consume desired topic deserialization error: {:?}", e);
                         ""
                     }
                 };
                 println!(
-                    "[ROBOT-KAFKA] [SUB] | received_coommand_move_to_loading_zone report received: {}",
+                    "[ROBOT-KAFKA] [SUB] | consume desired topic: {}",
                     payload
                 );
                 self.consumer
