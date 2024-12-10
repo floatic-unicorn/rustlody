@@ -12,7 +12,7 @@ async fn get_db_pool() -> Result<Pool<MySql>, Error> {
 }
 
 async fn clear_and_insert_test_data(pool: &Pool<MySql>) {
-    let tables: [&str; 14] = [
+    let tables: [&str; 15] = [
         "warehouse",
         "account",
         "robot_in_progress_picking",
@@ -27,6 +27,7 @@ async fn clear_and_insert_test_data(pool: &Pool<MySql>) {
         "picking",
         "picking_job",
         "path",
+        "unloading_station",
     ];
     for table in tables {
         let statement = String::from("DELETE FROM ") + table;
@@ -34,7 +35,7 @@ async fn clear_and_insert_test_data(pool: &Pool<MySql>) {
         sqlx::raw_sql(&statement).execute(pool).await.unwrap();
     }
 
-    let insert_stmts: [&str; 5] = [
+    let insert_stmts: [&str; 6] = [
         "INSERT INTO account (account_id, type, entity_id, role, email, password, created_at, updated_at) \
         VALUES (1, 'FLODY_CONSOLE', 1, 'ROLE_FLODY_CONSOLE', 'test@floactic.io', 'password', now(), now())",
 
@@ -49,6 +50,9 @@ async fn clear_and_insert_test_data(pool: &Pool<MySql>) {
 
         "INSERT INTO path(path_id, warehouse_id, location_code, priority, created_at, updated_at) \
         VALUES (1, 1, 'locationCode-1', 1, now(), now())",
+
+        "INSERT INTO unloading_station(unloading_station_id, warehouse_id, name, location_code, created_at, updated_at) \
+        VALUES (1, 1, 'unloading-station-1', 'unloading-station-1-location-code', now(), now())",
     ];
     for stmt in insert_stmts {
         println!("[SETUP] inserting setup data: {}", stmt);

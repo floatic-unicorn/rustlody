@@ -46,14 +46,12 @@ pub struct WsPickingCmd {
 struct WsUnloadingCmd {
     floor: i32,
     sequence: i32,
-    #[serde(rename = "pickingId")]
-    picking_id: String,
     #[serde(rename = "workGroupId")]
     work_group_id: String,
     #[serde(rename = "shortfallReasons")]
     shortfall_reasons: Vec<String>,
     #[serde(rename = "unloadingStationId")]
-    unloading_station_id: i64,
+    unloading_station_id: String,
     #[serde(rename = "locationCode")]
     location_code: String,
     #[serde(rename = "isTamperEvident")]

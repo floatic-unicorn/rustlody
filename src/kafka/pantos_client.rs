@@ -45,7 +45,7 @@ impl PantosKafkaClient {
 
     //received_command_move_to_loading_zone
     pub async fn consume_desired_topic(&self) {
-        thread::sleep(time::Duration::from_secs(3));
+        thread::sleep(time::Duration::from_secs(1));
 
         match self.consumer.recv().await {
             Err(_err) => println!(
