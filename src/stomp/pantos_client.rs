@@ -59,7 +59,11 @@ impl ezsockets::ClientExt for PantosStompClient {
     async fn on_text(&mut self, text: String) -> Result<(), Error> {
         match self.parse(text) {
             None => (),
-            Some(picking_ids) => { /* move the picking ids */ }
+            Some(new_picking_ids) => {
+                let mut locked_picking_ids = self.picking_ids.lock().unwrap();
+                locked_picking_ids.truncate(0);
+                locked_picking_ids.extend(new_picking_ids);
+            }
         }
         Ok(())
     }
@@ -77,7 +81,7 @@ impl ezsockets::ClientExt for PantosStompClient {
             .text("CONNECT\naccept-version:1.2\n\n\0")
             .unwrap();
         self.handle
-            .text("SUBSCRIBE\nid:sub-0\ndestination:/topic/fleet/dBK39Eak?concern=inProgress\n\n\0")
+            .text("SUBSCRIBE\nid:rustlody\ndestination:/topic/fleet/dBK39Eak?concern=inProgress\n\n\0")
             .unwrap();
         Ok(())
     }
