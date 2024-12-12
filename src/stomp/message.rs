@@ -4,7 +4,7 @@ use serde::Deserialize;
 pub struct WsRobotInProgress {
     #[serde(rename = "robotId")]
     robot_id: String,
-    status: String,
+    pub status: String,
     #[serde(rename = "inProgressPickings")]
     pub in_progress_pickings: Vec<WsPickingCmd>,
     #[serde(rename = "inProgressUnloadings")]
@@ -31,7 +31,7 @@ pub struct WsPickingCmd {
     wms_sku_id: String,
     #[serde(rename = "skuName")]
     sku_name: String,
-    //pickier: Optionn<String>,
+    //picker: Optionn<String>,
     #[serde(rename = "locationCode")]
     location_code: String,
     #[serde(rename = "skuBarcode")]

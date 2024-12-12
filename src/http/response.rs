@@ -1,4 +1,4 @@
-use std:: fmt;
+use std::fmt;
 
 use serde::Deserialize;
 
@@ -32,7 +32,7 @@ pub struct GetIdentifyRepresentativeInvoiceBarcodeResponse {
 
 impl fmt::Display for GetIdentifyRepresentativeInvoiceBarcodeResponse {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "[RES] | [GET] identify representative invoice barcode wave.name = {}", self.wave_name)
+        write!(f, "identify representative invoice barcode wave.name = {}", self.wave_name)
     }
 }
 
@@ -113,7 +113,7 @@ pub struct GetAllAssignedPickingsResponse{
 #[derive(Debug, Deserialize)]
 pub struct UnloadingCmd {
     #[serde(rename = "workGroupId")]
-    workgroup_id: String,
+    pub workgroup_id: String,
     #[serde(rename = "shortfallReason")]
     shortfall_reason: Option<String>,
     #[serde(rename = "unloadingStationId")]

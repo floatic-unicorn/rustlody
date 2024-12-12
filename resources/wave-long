@@ -1,0 +1,154 @@
+[
+  {
+    "warehouseId": "dBK39Eak",
+    "wmsWaveId": "001641972",
+    "waveName": "0809-27-네이버 RB-9 크리니크",
+    "affinity": "없음",
+    "sellingChannel": "네이버",
+    "boxType": "6호",
+    "maxBoxCount": 27,
+    "desiredBoxCount": 4,
+    "workGroups": [
+      {
+        "wmsWorkGroupId": "2024080896804521-CL",
+        "trackingNumber": "6078917960521",
+        "boxLocation": {
+          "floor": 1,
+          "sequence": 1
+        },
+        "works": [
+          {
+              "sku": {
+                  "wmsSkuId": "V68K010000",
+                  "name": "CLINIQUE POP PLUSH CR-01 3.4ML/.11FLOZ",
+                  "locationCode": "EE09-09-42",
+                  "skuBarcode": "192333142868"
+              },
+              "requestQuantity": 1,
+              "isTamperEvident": false
+          },
+          {
+              "sku": {
+                  "wmsSkuId": "V175170000",
+                  "name": "CHEEK POP-BLACK HONEY PO 3.5GM/.12OZ",
+                  "locationCode": "EE08-07-23",
+                  "skuBarcode": "192333101247"
+              },
+              "requestQuantity": 1,
+              "isTamperEvident": false
+          },
+          {
+              "sku": {
+                  "wmsSkuId": "V26Z400000",
+                  "name": "MY HAPPY COCOA & CASHMER 1.5ML/.05FLOZ",
+                  "locationCode": "EE08-22-22",
+                  "skuBarcode": "192333228289"
+              },
+              "requestQuantity": 1,
+              "isTamperEvident": false
+          }
+        ]
+      },
+      {
+        "wmsWorkGroupId": "2024080811063501-CL",
+        "trackingNumber": "6078917960534",
+        "boxLocation": {
+          "floor": 1,
+          "sequence": 2
+        },
+        "works": [
+          {
+              "sku": {
+                  "wmsSkuId": "ZGTY626000",
+                  "name": "EB WTR VEIL SPF27-62 ROS 10GM/.35OZ",
+                  "locationCode": "EE08-05-11",
+                  "skuBarcode": "020714758868"
+              },
+              "requestQuantity": 1,
+              "isTamperEvident": false
+          },
+          {
+              "sku": {
+                  "wmsSkuId": "V26Z400000",
+                  "name": "MY HAPPY COCOA & CASHMER 1.5ML/.05FLOZ",
+                  "locationCode": "EE08-22-22",
+                  "skuBarcode": "192333228289"
+              },
+              "requestQuantity": 1,
+              "isTamperEvident": false
+          },
+          {
+              "sku": {
+                  "wmsSkuId": "ZGNC010000",
+                  "name": "Watervale case",
+                  "locationCode": "EE08-04-11",
+                  "skuBarcode": "020714757656"
+              },
+              "requestQuantity": 1,
+              "isTamperEvident": false
+          }
+        ]
+      },
+      {
+        "wmsWorkGroupId": "2024080812454271-CL",
+        "trackingNumber": "6078917960595",
+        "boxLocation": {
+          "floor": 1,
+          "sequence": 3
+        },
+        "works": [
+            {
+                "sku": {
+                    "wmsSkuId": "V68K030000",
+                    "name": "CLINIQUE POP PLUSH CR-BR 3.4ML/.11FLOZ",
+                    "locationCode": "EE08-14-42",
+                    "skuBarcode": "192333142882"
+                },
+                "requestQuantity": 1,
+                "isTamperEvident": false
+            },
+            {
+                "sku": {
+                    "wmsSkuId": "V26Z400000",
+                    "name": "MY HAPPY COCOA & CASHMER 1.5ML/.05FLOZ",
+                    "locationCode": "EE08-22-22",
+                    "skuBarcode": "192333228289"
+                },
+                "requestQuantity": 1,
+                "isTamperEvident": false
+            }
+        ]
+      },
+      {
+        "wmsWorkGroupId": "2024080812154201-CL",
+        "trackingNumber": "6078917960613",
+        "boxLocation": {
+          "floor": 1,
+          "sequence": 4
+        },
+        "works": [
+          {
+              "sku": {
+                  "wmsSkuId": "V175210000",
+                  "name": "CHEEK POP-BALLERINA POP 3.5GM/.12OZ",
+                  "locationCode": "EE08-24-22",
+                  "skuBarcode": "192333101285"
+              },
+              "requestQuantity": 1,
+              "isTamperEvident": false
+          },
+          {
+              "sku": {
+                  "wmsSkuId": "V175200000",
+                  "name": "CHEEK POP-SORBET POP 3.5GM/.12OZ",
+                  "locationCode": "EE08-08-22",
+                  "skuBarcode": "192333101278"
+              },
+              "requestQuantity": 1,
+              "isTamperEvident": false
+          }
+        ]
+      }
+    ]
+  }
+]

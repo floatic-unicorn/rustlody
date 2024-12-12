@@ -1,54 +1,79 @@
-use crate::stomp::message::WsRobotInProgress;
 use async_trait::async_trait;
+use colored::Colorize;
 use ezsockets::ClientConfig;
 use ezsockets::Error;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::{thread, time};
 
+use crate::stomp::message::WsRobotInProgress;
+
 pub struct PantosStompClient {
     handle: ezsockets::Client<Self>,
-    picking_ids: Arc<Mutex<Vec<String>>>,
+    latest_status: Arc<Mutex<String>>,
+    picking_ids: Arc<Mutex<Vec<Vec<String>>>>,
 }
 
 impl PantosStompClient {
-    pub async fn init(picking_ids: Arc<Mutex<Vec<String>>>) {
+    pub async fn init(latest_status: Arc<Mutex<String>>, picking_ids: Arc<Mutex<Vec<Vec<String>>>>) {
         tracing_subscriber::fmt::init();
 
         let config = ClientConfig::new("ws://127.0.0.1:8080/ws");
         let (_, future) = ezsockets::connect(
             |handle| PantosStompClient {
                 handle,
+                latest_status,
                 picking_ids,
             },
             config,
         )
         .await;
-        thread::sleep(time::Duration::from_secs(3)); // wait for websocket to connect
+        thread::sleep(time::Duration::from_secs(2)); // wait for websocket to connect
 
         tokio::spawn(async move {
             future.await.unwrap();
         });
     }
 
-    pub fn parse(&self, text: String) -> Option<Vec<String>> {
+    fn parse(&self, text: &str) -> Option<WsRobotInProgress> {
         let mut msgs = text.split("\n");
         let header = msgs.next().unwrap();
         if header != "MESSAGE" {
             return None;
         }
 
+        let msgs = text.split("\n");
         let msg_body = msgs.last().unwrap().trim_matches('\0');
         let de_body: WsRobotInProgress = serde_json::from_str(msg_body).unwrap();
-        tracing::info!("[WS] | [RECV]: deserialized = {:?}", de_body);
+        Some(de_body)
+    }
 
-        Some(
-            de_body
-                .in_progress_pickings
-                .iter()
-                .map(|picking_cmd| picking_cmd.picking_id.clone())
-                .collect(),
-        )
+    fn parse_in_progress_status(&self, text: &str) -> Option<String> {
+        match self.parse(text) {
+            None=> None,
+            Some(ws_robot_in_progress) => {
+               Some(ws_robot_in_progress.status)
+            }
+        }
+    }
+
+    fn parse_in_progress_pickings(&self, text: &str) -> Option<Vec<String>> {
+        match self.parse(text) {
+            None=> None,
+            Some(ws_robot_in_progress) => {
+                println!("{} | [RECV]: {:?}", "[WS]".red().bold(), ws_robot_in_progress);
+
+                if ws_robot_in_progress.status == "WAITING_WORKER_TO_PICK" {
+                    return Some(ws_robot_in_progress 
+                        .in_progress_pickings
+                        .iter()
+                        .map(|picking_cmd| picking_cmd.picking_id.clone())
+                        .collect()
+                    );
+                }
+                None
+            }
+        }
     }
 }
 
@@ -57,22 +82,28 @@ impl ezsockets::ClientExt for PantosStompClient {
     type Call = ();
 
     async fn on_text(&mut self, text: String) -> Result<(), Error> {
-        match self.parse(text) {
+        match self.parse_in_progress_status(&text) {
+            None => (),
+            Some(new_status) => {
+                let mut locked_status = self.latest_status.lock().unwrap();
+                *locked_status = new_status
+            }
+        }
+        match self.parse_in_progress_pickings(&text) {
             None => (),
             Some(new_picking_ids) => {
                 let mut locked_picking_ids = self.picking_ids.lock().unwrap();
-                locked_picking_ids.truncate(0);
-                locked_picking_ids.extend(new_picking_ids);
+                locked_picking_ids.push(new_picking_ids);
             }
         }
         Ok(())
     }
 
-    async fn on_binary(&mut self, bytes: Vec<u8>) -> Result<(), Error> {
+    async fn on_binary(&mut self, _bytes: Vec<u8>) -> Result<(), Error> {
         panic!("[WS] received socket binary")
     }
 
-    async fn on_call(&mut self, call: Self::Call) -> Result<(), Error> {
+    async fn on_call(&mut self, _call: Self::Call) -> Result<(), Error> {
         panic!("[WS] received socket on_call")
     }
 
