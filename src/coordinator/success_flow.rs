@@ -17,6 +17,7 @@ pub async fn run_success_flow(
     let tracking_number = "6078917960521";  //must be one of the number in wave_file_path file 
     
     http_client.upload_excel(wave_file_path).await;
+    sleep(Duration::from_millis(50)).await;
 
     /* start loading */
     http_client.command_robot_loading().await;
@@ -34,20 +35,22 @@ pub async fn run_success_flow(
     assert!(desired_robot_status == "PICKING");
 
     while desired_robot_status != "UNLOADING" {
+        /*
         kafka_client.publish_started_picking(robot_uid).await;
         {
             let mut latest_status = latest_status_container.lock().unwrap().clone();
             while latest_status != "MOVING_FOR_PICKING" {
-                sleep(Duration::from_millis(100)).await;
+                sleep(Duration::from_millis(50)).await;
                 latest_status = latest_status_container.lock().unwrap().clone();
             }
         }
+        */
 
         kafka_client.publish_picking(robot_uid).await;
         {
             let mut latest_status = latest_status_container.lock().unwrap().clone();
             while latest_status != "WAITING_WORKER_TO_PICK" {
-                sleep(Duration::from_millis(100)).await;
+                sleep(Duration::from_millis(50)).await;
                 latest_status = latest_status_container.lock().unwrap().clone();
             }
         }
@@ -63,7 +66,7 @@ pub async fn run_success_flow(
         {
             let mut latest_status = latest_status_container.lock().unwrap().clone();
             while latest_status != "PICKING" {
-                sleep(Duration::from_millis(100)).await;
+                sleep(Duration::from_millis(50)).await;
                 latest_status = latest_status_container.lock().unwrap().clone();
             }
         }
@@ -74,6 +77,8 @@ pub async fn run_success_flow(
             http_client.complete_picking(picking_id).await;
         }
         desired_robot_status = kafka_client.consume_desired_topic().await;
+
+        sleep(Duration::from_millis(50)).await;
     }
 
     /* wait until f/c receives unloading are done */    
