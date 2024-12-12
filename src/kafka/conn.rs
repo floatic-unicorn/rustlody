@@ -1,8 +1,7 @@
+use rdkafka::config::{ClientConfig, RDKafkaLogLevel};
 use rdkafka::consumer::stream_consumer::StreamConsumer;
 use rdkafka::consumer::Consumer;
-use rdkafka::config::{ClientConfig, RDKafkaLogLevel};
 use rdkafka::producer::BaseProducer;
-
 
 pub fn make_consumer() -> StreamConsumer {
     let consumer: StreamConsumer = ClientConfig::new()
@@ -18,7 +17,7 @@ pub fn make_consumer() -> StreamConsumer {
     consumer
         .subscribe(&consumer_topics)
         .expect("[SETUP] Subscription failed");
-    return consumer;
+    consumer
 }
 
 pub fn make_producer() -> BaseProducer {

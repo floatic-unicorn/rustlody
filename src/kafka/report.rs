@@ -1,9 +1,9 @@
 use serde::Serialize;
 
-
 #[derive(Debug, Serialize)]
 struct ReportPayload<'a> {
     state: &'a str,
+    reason: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -19,16 +19,11 @@ pub struct ReportHeader<'a> {
 #[derive(Debug, Serialize)]
 pub struct ReportMessage<'a> {
     header: ReportHeader<'a>,
-    payload: ReportPayload<'a>
+    payload: ReportPayload<'a>,
 }
 
 impl<'a> ReportMessage<'a> {
-
-    pub fn new(
-        state: &'a str,
-        timestamp: f64,
-        robot_id: &'a str,
-    ) -> Self {
+    pub fn new(state: &'a str, timestamp: f64, robot_id: &'a str) -> Self {
         ReportMessage {
             header: ReportHeader {
                 r#type: "REPORT",
@@ -36,7 +31,10 @@ impl<'a> ReportMessage<'a> {
                 command_id: "",
                 timestamp,
             },
-            payload: ReportPayload {state}
+            payload: ReportPayload {
+                state,
+                reason: "".to_string(),
+            },
         }
     }
 }

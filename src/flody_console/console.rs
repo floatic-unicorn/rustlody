@@ -1,32 +1,34 @@
-/*
+use crate::http::pantos_client::PantosHttpClient;
+use crate::http::request::*;
+use crate::http::response::*;
+use crate::http::token::make_token;
+
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION},
     Client,
 };
 
-use crate::http::request::*;
-use crate::http::response::*;
-use crate::http::token::make_token;
-
-pub struct PantosHttpClient {
-    pub url: String,
-    pub client: Client,
+pub struct FlodyConsole {
+    url: String,
+    client: Client,
 }
 
-impl Default for PantosHttpClient {
+impl Default for FlodyConsole {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl PantosHttpClient {
+impl FlodyConsole {
     pub fn new() -> Self {
-        PantosHttpClient {
+        FlodyConsole {
             url: String::from("http://localhost:8080"),
             client: Client::new(),
         }
     }
+}
 
+impl PantosHttpClient for FlodyConsole {
     fn make_auth_headers(&self) -> HeaderMap<HeaderValue> {
         let mut headers = HeaderMap::new();
         let bearer = String::from("Bearer ") + &make_token();
@@ -37,7 +39,7 @@ impl PantosHttpClient {
     }
 
     // TOS
-    pub async fn upload_excel(&self, file_path: &str) {
+    async fn upload_excel(&self, file_path: &str) {
         println!("[TOS] | [REQ] 엑셀 업로드 요청");
 
         let url = String::from(&self.url) + "/v1/waves/multiple";
@@ -57,15 +59,15 @@ impl PantosHttpClient {
             .await
         {
             Ok(_res) => match _res.error_for_status() {
-                Ok(_res) => println!("[TOS] | [RES] upload_excel success"),
-                Err(_err) => panic!("[TOS] | [RES] upload_excel response error: {}", _err),
+                Ok(_res) => println!("[TOS] | [RES] 엑셀 업로드 요청 성공"),
+                Err(_err) => panic!("[TOS] | [RES] 엑셀 업로드 응답 에러: {}", _err),
             },
-            Err(_err) => panic!("[TOS] | [RES] upload_excel failed due to: {}", _err),
+            Err(_err) => panic!("[TOS] | [RES] 엑셀 업로드 응답 실패: {}", _err),
         }
     }
 
     // Flody Console
-    pub async fn command_robot_loading(&self) {
+    async fn command_robot_loading(&self) {
         println!("[FLODY_CONSOLE] | [REQ] 로딩존 이동 요청");
 
         let robot_uid = "dBK39Eak";
@@ -74,20 +76,14 @@ impl PantosHttpClient {
 
         match self.client.post(url).headers(headers).send().await {
             Ok(_res) => match _res.error_for_status() {
-                Ok(_res) => println!("[FLODY_CONSOLE] | [RES] command_robot_loading success"),
-                Err(_err) => panic!(
-                    "[FLODY_CONSOLE] | [RES] command_robot_loading response error: {}",
-                    _err
-                ),
+                Ok(_res) => println!("[FLODY_CONSOLE] | [RES] 로딩존 이동 요청 성공"),
+                Err(_err) => panic!("[FLODY_CONSOLE] | [RES] 로딩종 이동 응답 에러: {}", _err),
             },
-            Err(_err) => panic!(
-                "[FLODY_CONSOLE] | [RES] command_robot_loading failed due to: {}",
-                _err
-            ),
+            Err(_err) => panic!("[FLODY_CONSOLE] | [RES] 로딩존 응답 실패: {}", _err),
         }
     }
 
-    pub async fn identify_repesentative_invoice_barcode(
+    async fn identify_repesentative_invoice_barcode(
         &self,
         tracking_number: &str,
     ) -> GetIdentifyRepresentativeInvoiceBarcodeResponse {
@@ -104,7 +100,7 @@ impl PantosHttpClient {
                 "[FLODY_CONSOLE] | [RES] 대표 송장 바코드 인식 = {}",
                 response_data
             );
-            return response_data;
+            response_data
         } else {
             let status = response.status();
             match response.json::<ErrorResponse>().await {
@@ -120,7 +116,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn start_work(&self, robot_uid: &str, tracking_number: &str) {
+    async fn start_work(&self, robot_uid: &str, tracking_number: &str) {
         println!("[FLODY_CONSOLE] | [REQ] 작업 시작 요청");
 
         let url = String::from(&self.url) + "/v1/robots/" + robot_uid + "/pickingJob/assign";
@@ -145,7 +141,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn worker_arrived(&self, picking_ids: &Vec<String>) {
+    async fn worker_arrived(&self, picking_ids: &Vec<String>) {
         println!(
             "[FLODY_CONSOLE] | [REQ] 작업자 도착 요청 picking_ids={:?}",
             picking_ids
@@ -179,7 +175,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn get_same_location_pickings(&self, picking_id: &str) -> Vec<PickingDto> {
+    async fn get_same_location_pickings(&self, picking_id: &str) -> Vec<PickingDto> {
         println!("[FLODY_CONSOLE] | [REQ] 동일 로케이션 피킹 요청");
 
         let url =
@@ -209,7 +205,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn complete_picking(&self, picking_id: &str) {
+    async fn complete_picking(&self, picking_id: &str) {
         println!("[FLODY_CONSOLE] | [REQ] 작업 완료 요청 picking_id = {picking_id}");
 
         let url = String::from(&self.url) + "/v1/pickings/" + picking_id + "/complete";
@@ -224,7 +220,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn complete_partial(&self, picking_id: &str, all: bool) {
+    async fn complete_partial(&self, picking_id: &str, all: bool) {
         println!("[FLODY_CONSOLE] | [REQ] 결품 작업 완료 요청");
 
         let mut url = String::from(&self.url) + "/v1/pickings/" + picking_id + "/partiallyComplete";
@@ -242,7 +238,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn get_all_assigned_pickings(
+    async fn get_all_assigned_pickings(
         &self,
         robot_uid: &str,
     ) -> Vec<GetAllAssignedPickingsResponse> {
@@ -272,7 +268,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn get_total_unloadings(&self) -> GetUnloadingsTotalResponse {
+    async fn get_total_unloadings(&self) -> GetUnloadingsTotalResponse {
         println!("[FLODY_CONSOLE] | [REQ] 전체 언로딩 정보 요청");
 
         let url = String::from(&self.url) + "/v1/unloadings/total";
@@ -300,7 +296,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn complete_unloading(&self, workgroup_ids: &[&str]) {
+    async fn complete_unloading(&self, workgroup_ids: &[&str]) {
         println!("[FLODY_CONSOLE] | [REQ] 언로딩 완료 요청");
 
         let url = String::from(&self.url) + "/v1/unloadings/complete";
@@ -329,7 +325,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn command_initial_pose_reset(&self, robot_uid: &str) {
+    async fn command_initial_pose_reset(&self, robot_uid: &str) {
         println!("[FLODY_CONSOLE] | [REQ] 로봇 위치 초기화 요청");
 
         let url = String::from(&self.url) + "/v1/robots/" + robot_uid + "/resetInitialPose";
@@ -350,7 +346,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn command_unpause(&self, robot_uid: &str) {
+    async fn command_unpause(&self, robot_uid: &str) {
         println!("[FLODY_CONSOLE] | [REQ] 로봇 재활성화 요청");
 
         let url = String::from(&self.url) + "/v1/robots/" + robot_uid + "/unpause";
@@ -371,7 +367,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn set_robot_status_idle(&self, robot_uid: &str) {
+    async fn set_robot_status_idle(&self, robot_uid: &str) {
         println!("[FLODY_CONSOLE] | [REQ] 로봇 대기 요청");
 
         let url = String::from(&self.url) + "/v1/robots/" + robot_uid + "/idle";
@@ -386,7 +382,7 @@ impl PantosHttpClient {
         }
     }
 
-    pub async fn set_robot_status_fail(&self, robot_uid: &str) {
+    async fn set_robot_status_fail(&self, robot_uid: &str) {
         println!("[FLODY_CONSOLE] | [REQ] 로봇 작업 실패 요청");
 
         let url = String::from(&self.url) + "/v1/robots/" + robot_uid + "/fail";
@@ -418,4 +414,3 @@ impl PantosHttpClient {
     fn get_worklist();
     */
 }
-*/
