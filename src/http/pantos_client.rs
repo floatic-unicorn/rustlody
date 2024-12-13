@@ -1,3 +1,4 @@
+/*
 use crate::http::response::*;
 use reqwest::header::{HeaderMap, HeaderValue};
 
@@ -68,3 +69,4 @@ pub trait PantosHttpClient {
         robot_uid: &str,
     ) -> impl std::future::Future<Output = ()> + Send;
 }
+*/

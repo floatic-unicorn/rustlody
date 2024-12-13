@@ -8,19 +8,19 @@ use std::{thread, time};
 
 use crate::stomp::message::WsRobotInProgress;
 
-pub struct PantosStompClient {
+pub struct PantosSuccessFlodyConsole {
     handle: ezsockets::Client<Self>,
     latest_status: Arc<Mutex<String>>,
     picking_ids: Arc<Mutex<Vec<Vec<String>>>>,
 }
 
-impl PantosStompClient {
+impl PantosSuccessFlodyConsole {
     pub async fn init(latest_status: Arc<Mutex<String>>, picking_ids: Arc<Mutex<Vec<Vec<String>>>>) {
         tracing_subscriber::fmt::init();
 
         let config = ClientConfig::new("ws://127.0.0.1:8080/ws");
         let (_, future) = ezsockets::connect(
-            |handle| PantosStompClient {
+            |handle| PantosSuccessFlodyConsole {
                 handle,
                 latest_status,
                 picking_ids,
@@ -44,47 +44,76 @@ impl PantosStompClient {
 
         let msgs = text.split("\n");
         let msg_body = msgs.last().unwrap().trim_matches('\0');
-        let ws_robot_in_progress: WsRobotInProgress = serde_json::from_str(msg_body).unwrap();
-
-        println!(
-            "{} | [RECV]: status={:?}, in_progress_pickings={:?}",
-            "[WS]".red().bold(),
-            ws_robot_in_progress.status,
-            ws_robot_in_progress.in_progress_pickings
-        );
-        Some(ws_robot_in_progress)
+        let de_body: WsRobotInProgress = serde_json::from_str(msg_body).unwrap();
+        Some(de_body)
     }
 
-    fn update_on_message(&self, text: &str) {
+    fn parse_in_progress_status(&self, text: &str) -> Option<String> {
         match self.parse(text) {
-            None => (),
+            None=> None,
             Some(ws_robot_in_progress) => {
-                let status = ws_robot_in_progress.status;
+               Some(ws_robot_in_progress.status)
+            }
+        }
+    }
 
-                if status == "WAITING_WORKER_TO_PICK" {
-                    let new_picking_ids: Vec<String> = ws_robot_in_progress 
+    fn parse_in_progress_pickings(&self, text: &str) -> Option<Vec<String>> {
+        match self.parse(text) {
+            None => None,
+            Some(ws_robot_in_progress) => {
+                if ws_robot_in_progress.status == "WAITING_WORKER_TO_PICK" {
+                    return Some(ws_robot_in_progress 
                         .in_progress_pickings
                         .iter()
                         .map(|picking_cmd| picking_cmd.picking_id.clone())
-                        .collect();
-                    let mut locked_picking_ids = self.picking_ids.lock().unwrap();
-                    locked_picking_ids.push(new_picking_ids);
+                        .collect()
+                    );
                 }
-
-                let mut locked_status = self.latest_status.lock().unwrap();
-                *locked_status = status;
+                None
             }
         }
+    }
+
+    fn parse_in_progress(&self, text: &str) -> Result<(), Error> {
+        match self.parse(text) {
+            None => (),
+            Some(ws_robot_in_progress) => {
+                println!(
+                    "{} | [RECV]: status={:?}, in_progress_pickings={:?}",
+                    "[WS]".red().bold(),
+                    ws_robot_in_progress.status,
+                    ws_robot_in_progress.in_progress_pickings
+                );
+            }
+        }
+
+        match self.parse_in_progress_status(&text) {
+            None => (),
+            Some(new_status) => {
+                let mut locked_status = self.latest_status.lock().unwrap();
+                *locked_status = new_status
+            }
+        }
+        match self.parse_in_progress_pickings(&text) {
+            None => (),
+            Some(new_picking_ids) => {
+                let mut locked_picking_ids = self.picking_ids.lock().unwrap();
+                locked_picking_ids.push(new_picking_ids);
+            }
+        }
+        Ok(())
     }
 }
 
 #[async_trait]
-impl ezsockets::ClientExt for PantosStompClient {
+impl ezsockets::ClientExt for PantosSuccessFlodyConsole {
     type Call = ();
 
     async fn on_text(&mut self, text: String) -> Result<(), Error> {
-        self.update_on_message(&text);
-        Ok(())
+        match self.parse_in_progress(&text) {
+            Err(_) => panic!("[WS] parse in progress ERROR"),
+            Ok(_) => Ok(())
+        }
     }
 
     async fn on_binary(&mut self, _bytes: Vec<u8>) -> Result<(), Error> {

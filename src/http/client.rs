@@ -1,4 +1,3 @@
-/*
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION},
     Client,
@@ -418,4 +417,3 @@ impl PantosHttpClient {
     fn get_worklist();
     */
 }
-*/
