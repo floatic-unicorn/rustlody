@@ -16,19 +16,31 @@ use crate::kafka::report::ReportMessage;
 #[allow(non_camel_case_types)]
 #[derive(EnumString)]
 pub enum DlodyState {
-    EMERGENCY_STOPPED(String),
-    RECOVERED_FROM_EMERGENCY_STOP(String),
-    FAILED_TO_UNPAUSE(String),
-    STARTED_PICKING(String),
-    PICKING(String),
-    STARTED_WAITING_FOR_UNLOADING(String),
-    WAITING_FOR_UNLOADING(String),
-    STARTED_WAITING(String),
-    WAITING(String),
-    STARTED_UNLOADING(String),
-    UNLOADING(String),
-    STARTED_TRAVELING(String),
-    ARRIVED_AT_POINT(String)
+    EMERGENCY_STOPPED,
+    RECOVERED_FROM_EMERGENCY_STOP,
+    FAILED_TO_UNPAUSE,
+    STARTED_PICKING,
+    PICKING,
+    STARTED_WAITING_FOR_UNLOADING,
+    WAITING_FOR_UNLOADING,
+    STARTED_WAITING,
+    WAITING,
+    STARTED_UNLOADING,
+    UNLOADING,
+    STARTED_TRAVELING,
+    ARRIVED_AT_POINT,
+}
+
+#[allow(non_camel_case_types)]
+#[derive(EnumString)]
+pub enum DlodyCommand {
+    PICKING,
+    UNLOADING,
+    LOADING,
+    WAITING,
+    WAITING_FOR_UNLOADING,
+    TRAVELING,
+    UNPAUSED,
 }
 
 pub struct Dlody {
@@ -62,8 +74,10 @@ impl PantosKafkaClient for Dlody {
             ),
             Ok(_msg) => {
                 let payload = match _msg.payload_view::<str>() {
-                    None => "",
                     Some(Ok(m)) => m,
+                    None => panic!(
+                        "[ROBOT-KAFKA] | [SUB] | [ERR] | consume desired topic deserialization error",
+                    ),
                     Some(Err(e)) => panic!(
                         "[ROBOT-KAFKA] | [SUB] | [ERR] | consume desired topic deserialization error: {:?}",
                         e
@@ -75,8 +89,8 @@ impl PantosKafkaClient for Dlody {
 
                 let deserialized: DesiredMessage = serde_json::from_str(&payload).unwrap();
                 println!(
-                    "{} | [SUB] | consumed robot status={}, message={}",
-                    "[ROBOT]".blue().bold(),
+                    "{} | consumed robot status={}, message={}",
+                    "[ROBOT] | [SUB]".blue().bold(),
                     deserialized.payload.state,
                     payload
                 );
@@ -99,8 +113,8 @@ impl PantosKafkaClient for Dlody {
         self.producer.poll(Duration::from_millis(100));
         self.producer.flush(Duration::from_secs(1));
         println!(
-            "{} | [PUB] published to {}: {}",
-            "[ROBOT]".green().bold(),
+            "{} | published to {}: {}",
+            "[ROBOT] | [PUB]".green().bold(),
             topic,
             serialized_msg
         );
