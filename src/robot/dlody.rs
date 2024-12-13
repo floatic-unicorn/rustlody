@@ -6,11 +6,30 @@ use rdkafka::consumer::stream_consumer::StreamConsumer;
 use rdkafka::consumer::{CommitMode, Consumer};
 use rdkafka::message::Message;
 use rdkafka::producer::{BaseProducer, BaseRecord, Producer};
+use strum_macros::EnumString;
 
 use crate::kafka::conn::{make_consumer, make_producer};
 use crate::kafka::desired::DesiredMessage;
 use crate::kafka::pantos_client::PantosKafkaClient;
 use crate::kafka::report::ReportMessage;
+
+#[allow(non_camel_case_types)]
+#[derive(EnumString)]
+pub enum DlodyState {
+    EMERGENCY_STOPPED(String),
+    RECOVERED_FROM_EMERGENCY_STOP(String),
+    FAILED_TO_UNPAUSE(String),
+    STARTED_PICKING(String),
+    PICKING(String),
+    STARTED_WAITING_FOR_UNLOADING(String),
+    WAITING_FOR_UNLOADING(String),
+    STARTED_WAITING(String),
+    WAITING(String),
+    STARTED_UNLOADING(String),
+    UNLOADING(String),
+    STARTED_TRAVELING(String),
+    ARRIVED_AT_POINT(String)
+}
 
 pub struct Dlody {
     consumer: StreamConsumer,

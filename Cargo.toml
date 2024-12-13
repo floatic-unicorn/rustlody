@@ -25,3 +25,5 @@ async-trait = "0.1.52"
 serde_json = "1.0.133"
 indoc = "2.0.5"
 colored = "2.1.0"
+strum = { version = "0.26.3", features = ["derive"] }
+strum_macros = "0.26.4"

@@ -5,6 +5,7 @@ use crate::flody_console::console::FlodyConsole;
 use crate::http::pantos_client::PantosHttpClient;
 use crate::kafka::pantos_client::PantosKafkaClient;
 use crate::robot::dlody::Dlody;
+use crate::robot::modes::spawn_successful_robot;
 
 pub async fn run_success_flow(
     flody_console: FlodyConsole,
@@ -14,6 +15,8 @@ pub async fn run_success_flow(
     wave_file_path: &str,
 ) {
     println!("\n\n===START SUCCESS FLOW TEST===\n\n");
+
+    spawn_successful_robot().await;
 
     let robot_uid = "dBK39Eak";
     let tracking_number = "6078917960521"; //must be one of the number in wave_file_path file
