@@ -2,13 +2,16 @@ use std::str::FromStr;
 use tokio::time::{sleep, Duration};
 use colored::Colorize;
 
+use crate::database::db::setup_success_flow;
 use crate::flody_console::console::{FlodyConsole, FlodyConsoleState};
 use crate::robot::modes::init_successful_robot;
 
-pub async fn run_success_flow(wave_file_path: &str) {
+pub async fn run_success_flow() {
     /* setup */
+    let wave_file_path = "./resources/wave-long";
     let robot_uid = "dBK39Eak";
 
+    setup_success_flow(wave_file_path).await;
     init_successful_robot(robot_uid.to_string()).await;
 
     let flody_console = FlodyConsole::new();

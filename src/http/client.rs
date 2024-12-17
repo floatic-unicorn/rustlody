@@ -103,7 +103,8 @@ impl PantosHttpClient {
                 "[FLODY_CONSOLE] | [RES] 대표 송장 바코드 인식 = {}",
                 response_data
             );
-            return response_data;
+            response_data
+
         } else {
             let status = response.status();
             match response.json::<ErrorResponse>().await {
@@ -192,7 +193,8 @@ impl PantosHttpClient {
                 "[FLODY_CONSOLE] | [RES] 동일 로케이션 피킹 size = {}",
                 response_data.len()
             );
-            return response_data;
+            response_data
+
         } else {
             let status = response.status();
             match response.json::<ErrorResponse>().await {
@@ -257,7 +259,8 @@ impl PantosHttpClient {
                 "[FLODY_CONSOLE] | [RES] 작업 목록 확인 size= {}",
                 response_data.len()
             );
-            return response_data;
+            response_data
+
         } else {
             let status = response.status();
             match response.json::<ErrorResponse>().await {
@@ -285,7 +288,8 @@ impl PantosHttpClient {
                 response_data.in_progresses.len(),
                 response_data.queue.len()
             );
-            return response_data;
+            response_data
+
         } else {
             let status = response.status();
             match response.json::<ErrorResponse>().await {

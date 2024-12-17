@@ -12,6 +12,7 @@ use crate::kafka::conn::{make_consumer, make_producer};
 use crate::kafka::desired::DesiredMessage;
 use crate::kafka::pantos_client::PantosKafkaClient;
 use crate::kafka::report::ReportMessage;
+use crate::kafka::status::StatusMessage;
 
 #[allow(non_camel_case_types)]
 #[derive(EnumString)]
@@ -44,22 +45,23 @@ pub enum DlodyCommand {
 }
 
 pub struct Dlody {
+    robot_uid: String,
     consumer: StreamConsumer,
     producer: BaseProducer,
 }
 
 impl Default for Dlody {
     fn default() -> Self {
-        Self::new()
+        panic!("[SETUP] kafka client setup failed; default disallowed");
     }
 }
 
 impl Dlody {
-    pub fn new() -> Self {
+    pub fn new(robot_uid: String,) -> Self {
         let consumer = make_consumer();
         let producer = make_producer();
         println!("[SETUP] kafka client setup success");
-        Dlody { consumer, producer }
+        Dlody { robot_uid, consumer, producer }
     }
 }
 
@@ -94,7 +96,7 @@ impl PantosKafkaClient for Dlody {
                     deserialized.payload.state,
                     payload
                 );
-                return deserialized.payload.state;
+                deserialized.payload.state
             }
         }
     }
@@ -108,6 +110,29 @@ impl PantosKafkaClient for Dlody {
                 BaseRecord::to(&topic)
                     .payload(&serialized_msg)
                     .key(robot_uid),
+            )
+            .expect("[ROBOT-KAFKA] | [PUB] failed to enqueue");
+        self.producer.poll(Duration::from_millis(100));
+        self.producer.flush(Duration::from_secs(1));
+        println!(
+            "{} | published to {}: {}",
+            "[ROBOT] | [PUB]".green().bold(),
+            topic,
+            serialized_msg
+        );
+    }
+
+    // TODO: merge with publish_reported_message && change topic name
+    fn publish_status_message(&self, message: StatusMessage) {
+        let robot_id = String::clone(&self.robot_uid);
+        let topic = format!("local.fleet.{robot_id}.status.json");
+        let serialized_msg = serde_json::to_string(&message).unwrap();
+
+        self.producer
+            .send(
+                BaseRecord::to(&topic)
+                    .payload(&serialized_msg)
+                    .key(&robot_id),
             )
             .expect("[ROBOT-KAFKA] | [PUB] failed to enqueue");
         self.producer.poll(Duration::from_millis(100));
@@ -156,4 +181,16 @@ impl PantosKafkaClient for Dlody {
     async fn publish_arrived_at_emergency_position(&self, _: &str) {}
 
     async fn publish_arrived_at_recovered_position(&self, _: &str) {}
+
+    async fn publish_off_to_on_switch(&self) {
+        let robot_id = String::clone(&self.robot_uid);
+        let message = StatusMessage::new(robot_id, false);
+        self.publish_status_message(message);
+    }
+
+    async fn publish_location_scan(&self) {
+        let robot_id = String::clone(&self.robot_uid);
+        let message = StatusMessage::new(robot_id, true);
+        self.publish_status_message(message);
+    }
 }

@@ -54,9 +54,8 @@ impl FlodyConsole {
         .await;
     }
 
-    pub async fn get_status(&self) -> String {
+    pub fn get_status(&self) -> String {
         return self.latest_status_container.lock().unwrap().clone();
-
     }
 
     pub async fn get_in_progress_picking_ids(&self) -> Vec<String> {
@@ -66,6 +65,6 @@ impl FlodyConsole {
             assert!(received_picking_ids.len() != 0);
             received_picking_ids
         };
-        return request_picking_ids;
-    }
+        request_picking_ids
+   }
 }

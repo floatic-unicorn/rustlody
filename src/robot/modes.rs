@@ -5,7 +5,7 @@ use super::dlody::{Dlody, DlodyCommand};
 use crate::kafka::pantos_client::PantosKafkaClient;
 
 pub async fn init_successful_robot(robot_uid: String) {
-    let dlody = Dlody::new();
+    let dlody = Dlody::new(String::clone(&robot_uid));
     
     tokio::spawn(async move {
         let mut is_running = true;

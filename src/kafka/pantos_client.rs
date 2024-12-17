@@ -1,9 +1,11 @@
-use super::report::ReportMessage;
+use super::{report::ReportMessage, status::StatusMessage};
 
 pub trait PantosKafkaClient {
     fn consume_desired_topic(&self) -> impl std::future::Future<Output = String> + Send;
 
     fn publish_reported_message(&self, robot_uid: &str, message: ReportMessage);
+
+    fn publish_status_message(&self, message: StatusMessage);
 
     fn publish_started_loading(
         &self,
@@ -37,4 +39,8 @@ pub trait PantosKafkaClient {
         &self,
         robot_uid: &str,
     ) -> impl std::future::Future<Output = ()> + Send;
+
+    fn publish_off_to_on_switch(&self) -> impl std::future::Future<Output = ()> + Send;
+
+    fn publish_location_scan(&self) -> impl std::future::Future<Output = ()> + Send;
 }

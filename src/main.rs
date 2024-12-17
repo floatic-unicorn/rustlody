@@ -8,8 +8,6 @@ pub mod stomp;
 
 #[tokio::main]
 async fn main() {
-    let file_path = "./resources/wave-long";
-    database::db::setup(file_path).await;
-
-    coordinator::success_flow::run_success_flow(file_path).await
+    //coordinator::success_flow::run_success_flow(file_path).await
+    coordinator::localization_flow::run_localization_flow_booting_and_no_job().await;
 }
