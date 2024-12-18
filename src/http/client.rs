@@ -410,6 +410,21 @@ impl PantosHttpClient {
         }
     }
 
+    pub async fn halt_robot(&self, robot_uid: &str) {
+        println!("[FLODY_CONSOLE] | [REQ] 로봇 멈춤 요청");
+
+        let url = String::from(&self.url) + "/v1/robots/" + robot_uid + "/halt";
+        let headers = self.make_auth_headers();
+
+        match self.client.post(url).headers(headers).send().await {
+            Ok(_res) => match _res.error_for_status() {
+                Ok(_res) => println!("[FLODY_CONSOLE] | [RES] 로봇 대기 success"),
+                Err(_err) => panic!("[FLODY_CONSOLE] | [RES] 로봇 대기 response error: {}", _err),
+            },
+            Err(_err) => panic!("[FLODY_CONSOLE] | [RES] 로봇 대기 failed due to: {}", _err),
+        }
+    }
+
     /*
     // Admin Console
     fn get_warehouses();

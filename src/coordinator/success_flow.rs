@@ -2,7 +2,7 @@ use std::str::FromStr;
 use tokio::time::{sleep, Duration};
 use colored::Colorize;
 
-use crate::database::db::setup_success_flow;
+use crate::database::db::*;
 use crate::flody_console::console::{FlodyConsole, FlodyConsoleState};
 use crate::robot::modes::init_successful_robot;
 
@@ -100,4 +100,16 @@ pub async fn run_success_flow() {
     assert!(final_fc_status == "MOVING_FOR_LOADING".to_string());
 
     println!("\n\n===END SUCCESS FLOW TEST===\n\n");
+}
+
+
+pub async fn run_halt_flow() {
+    let robot_uid = "dBK39Eak";
+
+    setup_halt_flow().await;
+
+    let flody_console = FlodyConsole::new();
+    flody_console.init_websocket().await;
+
+    flody_console.http_client.halt_robot(robot_uid).await;
 }

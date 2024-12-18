@@ -10,6 +10,8 @@ impl StatusMessage {
     pub fn new(
         robot_id: String,
         is_localized: bool,
+        is_paused: bool,
+        is_collisioned: bool,
     ) -> Self {
         StatusMessage {
             header: StatusHeader {
@@ -25,8 +27,8 @@ impl StatusMessage {
                     isLow: false,
                 },
                 emergency: StatusEmergency {
-                    isCollisioned: false,
-                    isPaused: false,
+                    isPaused: is_paused,
+                    isCollisioned: is_collisioned,
                 },
                 navigation: StatusNavigation {
                     isMoving: false,

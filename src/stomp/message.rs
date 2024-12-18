@@ -1,5 +1,6 @@
 use serde::Deserialize;
 
+
 #[derive(Debug, Deserialize)]
 pub struct WsRobotInProgress {
     #[serde(rename = "robotId")]
@@ -12,7 +13,7 @@ pub struct WsRobotInProgress {
     #[serde(rename = "waveMetadata")]
     wave_metadata: Option<WsWaveMetadata>,
     #[serde(rename = "emergencyError")]
-    emergency_error: Option<String>,
+    emergency_error: Option<WsEmergencyError>,
     #[serde(rename = "batteryPercent")]
     battery_percent: Option<i32>,
 }
@@ -76,9 +77,10 @@ struct WsWaveMetadata {
 }
 
 #[derive(Debug, Deserialize)]
-struct WsEmergecyError {
+struct WsEmergencyError {
     #[serde(rename = "recoveryStatus")]
     recovery_status: String,
     problems: Vec<String>,
     solutions: Vec<String>,
 }
+

@@ -3,7 +3,8 @@ use serde::Serialize;
 #[derive(Debug, Serialize)]
 struct ReportPayload<'a> {
     state: &'a str,
-    reason: String,
+    //reason: String,
+    code: &'a str,
 }
 
 #[derive(Debug, Serialize)]
@@ -33,7 +34,8 @@ impl<'a> ReportMessage<'a> {
             },
             payload: ReportPayload {
                 state,
-                reason: "".to_string(),
+                //reason: "test-reason".to_string(),
+                code: "test-code"
             },
         }
     }

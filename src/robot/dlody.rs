@@ -102,7 +102,7 @@ impl PantosKafkaClient for Dlody {
     }
 
     fn publish_reported_message(&self, robot_uid: &str, message: ReportMessage) {
-        let topic = format!("local.fleet.{robot_uid}.reported.json");
+        let topic = format!("local.fleet.{robot_uid}.reported");
         let serialized_msg = serde_json::to_string(&message).unwrap();
 
         self.producer
@@ -125,7 +125,7 @@ impl PantosKafkaClient for Dlody {
     // TODO: merge with publish_reported_message && change topic name
     fn publish_status_message(&self, message: StatusMessage) {
         let robot_id = String::clone(&self.robot_uid);
-        let topic = format!("local.fleet.{robot_id}.status.json");
+        let topic = format!("local.fleet.{robot_id}.status");
         let serialized_msg = serde_json::to_string(&message).unwrap();
 
         self.producer
@@ -178,19 +178,25 @@ impl PantosKafkaClient for Dlody {
         self.publish_reported_message(robot_uid, message);
     }
 
+    async fn publish_emergency_stop(&self) -> () {
+        let robot_id = String::clone(&self.robot_uid);
+        let message = StatusMessage::new(robot_id, false, true, true);
+        self.publish_status_message(message);
+    }
+
     async fn publish_arrived_at_emergency_position(&self, _: &str) {}
 
     async fn publish_arrived_at_recovered_position(&self, _: &str) {}
 
     async fn publish_off_to_on_switch(&self) {
         let robot_id = String::clone(&self.robot_uid);
-        let message = StatusMessage::new(robot_id, false);
+        let message = StatusMessage::new(robot_id, false, false, false);
         self.publish_status_message(message);
     }
 
     async fn publish_location_scan(&self) {
         let robot_id = String::clone(&self.robot_uid);
-        let message = StatusMessage::new(robot_id, true);
+        let message = StatusMessage::new(robot_id, true, false, false);
         self.publish_status_message(message);
     }
 }

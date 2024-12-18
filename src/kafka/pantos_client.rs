@@ -30,6 +30,8 @@ pub trait PantosKafkaClient {
 
     fn publish_unloading(&self, robot_uid: &str) -> impl std::future::Future<Output = ()> + Send;
 
+    fn publish_emergency_stop(&self) -> impl std::future::Future<Output = ()> + Send;
+
     fn publish_arrived_at_emergency_position(
         &self,
         robot_uid: &str,

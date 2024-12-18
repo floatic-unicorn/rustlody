@@ -7,13 +7,13 @@ pub fn make_consumer() -> StreamConsumer {
     let consumer: StreamConsumer = ClientConfig::new()
         .set("group.id", "rustlody")
         .set("bootstrap.servers", "127.0.0.1:9092")
-        .set("auto.offset.reset", "earliest")
-        //.set("auto.offset.reset", "latest")
+        //.set("auto.offset.reset", "earliest")
+        .set("auto.offset.reset", "latest")
         .set_log_level(RDKafkaLogLevel::Debug)
         .create()
         .expect("Consumer creation failed");
 
-    let consumer_topics = ["local.fleet.dBK39Eak.desired.json"];
+    let consumer_topics = ["local.fleet.dBK39Eak.desired"];
     consumer
         .subscribe(&consumer_topics)
         .expect("[SETUP] Subscription failed");
