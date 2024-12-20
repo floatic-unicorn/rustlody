@@ -45,4 +45,6 @@ pub trait PantosKafkaClient {
     fn publish_off_to_on_switch(&self) -> impl std::future::Future<Output = ()> + Send;
 
     fn publish_location_scan(&self) -> impl std::future::Future<Output = ()> + Send;
+
+    fn publish_error_status(&self) -> impl std::future::Future<Output = ()> + Send;
 }

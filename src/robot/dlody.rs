@@ -199,4 +199,10 @@ impl PantosKafkaClient for Dlody {
         let message = StatusMessage::new(robot_id, true, false, false);
         self.publish_status_message(message);
     }
+
+    async fn publish_error_status(&self) {
+        let robot_id = String::clone(&self.robot_uid);
+        let message = StatusMessage::operation_error(robot_id);
+        self.publish_status_message(message);
+    }
 }

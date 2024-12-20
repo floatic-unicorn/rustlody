@@ -35,11 +35,17 @@ pub async fn run_localization_flow_booting_and_has_picking_job() {
 
     dlody.publish_off_to_on_switch().await;
     sleep(Duration::from_millis(1500)).await;
-    assert!(flody_console.get_status() == "BOOTING");
+    assert!(
+        flody_console.get_status() == "BOOTING",
+        "status mistmatch: expected `BOOTING`, was `{}`", flody_console.get_status()
+    );
 
     dlody.publish_location_scan().await;
     sleep(Duration::from_millis(1500)).await;
-    assert!(flody_console.get_status() == "MOVING_FOR_PICKING");
+    assert!(
+        flody_console.get_status() == "MOVING_FOR_PICKING",
+        "status mistmatch: expected `MOVING_FOR_PICKING`, was `{}`", flody_console.get_status()
+    );
 }
 
 pub async fn run_localization_flow_booting_and_was_emergency_stopped() {
@@ -51,7 +57,17 @@ pub async fn run_localization_flow_booting_and_was_emergency_stopped() {
     let flody_console = FlodyConsole::new();
     flody_console.init_websocket().await;
 
-    dlody.publish_emergency_stop().await;
+    dlody.publish_off_to_on_switch().await;
     sleep(Duration::from_millis(1500)).await;
-    assert!(flody_console.get_status() == "EMERGENCY_STOPPED");
+    assert!(
+        flody_console.get_status() == "BOOTING",
+        "status mistmatch: expected `BOOTING`, was `{}`", flody_console.get_status()
+    );
+
+    dlody.publish_error_status().await;
+    sleep(Duration::from_millis(1500)).await;
+    assert!(
+        flody_console.get_status() == "EMERGENCY_STOPPED",
+        "status mistmatch: expected `EMERGENCY_STOPPED`, was `{}`", flody_console.get_status()
+    );
 }

@@ -79,7 +79,8 @@ pub async fn setup_success_flow(file_path: &str) {
 pub async fn setup_localization_flow_booting_and_no_job() {
     let pool = get_db_pool().await.unwrap();
 
-    let tables: [&str; 2] = [
+    let tables: [&str; 3] = [
+        "robot_in_progress_picking",
         "robot",
         "robot_status_detail",
     ];
@@ -93,8 +94,29 @@ pub async fn setup_localization_flow_booting_and_no_job() {
         "INSERT INTO robot_status_detail(robot_status_detail_id, is_charging, is_full, is_low, is_collisioned, is_paused, is_localized, is_moving, op_status, op_mode, created_at, updated_at) \
         VALUES (1, false, false, false, false, false, true, false, 'INACTIVE', 'test-op-mode', now(), now())",
 
-        "INSERT INTO robot(robot_id, warehouse_id, name, online, robot_status_detail_id, created_at, updated_at) \
-        VALUES (1, 1, 'test-robot-localization-flow-booting-and-no-job', true, 1, now(), now())",
+        "INSERT INTO robot( \
+            robot_id,
+            status,
+            warehouse_id,
+            name, online,
+            robot_status_detail_id,
+            max_picking_quantity,
+            worker_card_recognition,
+            halt_processing,
+            created_at,
+            updated_at) \
+        VALUES ( \
+            1,
+            'EMERGENCY_STOPPED',
+            1,
+            'test-robot-localization-flow-booting-and-no-job',
+            true,
+            1,
+            false,
+            false,
+            false,
+            now(),
+            now())",
     ];
     for stmt in insert_stmts {
         println!("[SETUP] inserting setup data: {}", stmt);
@@ -120,8 +142,29 @@ pub async fn setup_localization_flow_booting_and_has_picking_job() {
         "INSERT INTO robot_status_detail(robot_status_detail_id, is_charging, is_full, is_low, is_collisioned, is_paused, is_localized, is_moving, op_status, op_mode, created_at, updated_at) \
         VALUES (1, false, false, false, false, false, true, false, 'INACTIVE', 'test-op-mode', now(), now())",
 
-        "INSERT INTO robot(robot_id, warehouse_id, name, online, robot_status_detail_id, created_at, updated_at) \
-        VALUES (1, 1, 'test-robot-localization-flow-booting-and-no-job', true, 1, now(), now())",
+        "INSERT INTO robot( \
+            robot_id,
+            status,
+            warehouse_id,
+            name, online,
+            robot_status_detail_id,
+            max_picking_quantity,
+            worker_card_recognition,
+            halt_processing,
+            created_at,
+            updated_at) \
+        VALUES ( \
+            1,
+            'EMERGENCY_STOPPED',
+            1,
+            'test-robot-localization-flow-booting-and-has-picking-job',
+            true,
+            1,
+            false,
+            false,
+            false,
+            now(),
+            now())",
 
         "INSERT INTO robot_in_progress_picking(robot_id, floor, is_tamper_evident, location_code, picking_id, request_quantity, sequence, sku_barcode, sku_name, wms_sku_id, work_group_id, work_id, orders) \
         VALUES (1, 1, false, 'location-code-1', 1, 1, 1, 'sku-barcode', 'sku-name', 'wms-sku-id', 1, 1, 0)",
@@ -151,12 +194,32 @@ pub async fn setup_localization_flow_booting_and_was_emergency_stopped() {
         "INSERT INTO robot_status_detail(robot_status_detail_id, is_charging, is_full, is_low, is_collisioned, is_paused, is_localized, is_moving, op_status, op_mode, created_at, updated_at) \
         VALUES (1, false, false, false, false, false, true, false, 'INACTIVE', 'test-op-mode', now(), now())",
 
-        "INSERT INTO robot(robot_id, status, warehouse_id, name, online, robot_status_detail_id, created_at, updated_at) \
-        VALUES (1, 'EMERGENCY_STOPPED', 1, 'test-robot-localization-flow-booting-and-no-job', true, 1, now(), now())",
+        "INSERT INTO robot( \
+            robot_id,
+            status,
+            warehouse_id,
+            name, online,
+            robot_status_detail_id,
+            max_picking_quantity,
+            worker_card_recognition,
+            halt_processing,
+            created_at,
+            updated_at) \
+        VALUES ( \
+            1,
+            'EMERGENCY_STOPPED',
+            1,
+            'test-robot-localization-flow-booting-and-no-job',
+            true,
+            1,
+            false,
+            false,
+            false,
+            now(),
+            now())",
 
         "INSERT INTO robot_in_progress_picking(robot_id, floor, is_tamper_evident, location_code, picking_id, request_quantity, sequence, sku_barcode, sku_name, wms_sku_id, work_group_id, work_id, orders) \
         VALUES (1, 1, false, 'location-code-1', 1, 1, 1, 'sku-barcode', 'sku-name', 'wms-sku-id', 1, 1, 0)",
-
     ];
     for stmt in insert_stmts {
         println!("[SETUP] inserting setup data: {}", stmt);

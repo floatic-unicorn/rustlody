@@ -46,6 +46,41 @@ impl StatusMessage {
             }
         }
     }
+
+    pub fn operation_error(robot_id: String) -> Self {
+        StatusMessage {
+            header: StatusHeader {
+                r#type: "STATUS".to_string(),
+                robot_id,
+                command_id: "".to_string(),
+                timestamp: 0.0,
+            },
+            payload: StatusPayload {
+                battery: StatusBattery {
+                    isCharing: false,
+                    isFull: false,
+                    isLow: false,
+                },
+                emergency: StatusEmergency {
+                    isCollisioned: true,
+                    isPaused: false,
+                },
+                navigation: StatusNavigation {
+                    isMoving: false,
+                    isLocalized: true,
+                },
+                opMode: String::from("OPERATION"),
+                opStatus: String::from("ERROR"),
+                session: vec![
+                    StatusSession {
+                        errors: vec![],
+                        module: String::from(""),
+                        status: String::from(""),
+                    }
+                ]
+            }
+        }
+    }
 }
 
 #[derive(Debug, Serialize)]
